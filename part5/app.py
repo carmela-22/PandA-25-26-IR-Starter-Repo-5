@@ -13,7 +13,7 @@ BUT:
 from typing import List, Dict, Any
 import json
 import os
-from .constants import BANNER, HELP
+from constants import BANNER, HELP
 
 def find_spans(text: str, pattern: str):
     """Return [(start, end), ...] for all (possibly overlapping) matches.
@@ -129,7 +129,10 @@ def load_sonnets() -> List[Dict[str, object]]:
       - Use json.load(fileobj)
     """
     # BEGIN
-    return {}
+    path = module_relative_path("sonnets.json")
+    with open(path, "r", encoding ="utf-8") as f:
+        data = json.load(f)
+    return data
     # END
 
 CONFIG_DEFAULTS = { "highlight": True, "search_mode": "AND" }
@@ -144,7 +147,21 @@ def load_config() -> Dict[str, object]:
       - If it exists, JSON-decode it and validate keys, falling back to the defaults in CONFIG_DEFAULTS for missing keys.
     """
     # BEGIN
-    return dict(CONFIG_DEFAULTS)
+    path = module_relative_path("config.json")
+    if not os.path.exists(path):
+        return dict(CONFIG_DEFAULTS)
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        config = dict(CONFIG_DEFAULTS)
+        for key in CONFIG_DEFAULTS:
+            if key in data:
+                config[key] = data[key]
+
+        return config
+    except Exception:
+        return dict(CONFIG_DEFAULTS)
     # END
 
 def save_config(cfg: Dict[str, object]) -> None:
@@ -156,7 +173,9 @@ def save_config(cfg: Dict[str, object]) -> None:
       - Use indent=2 and ensure_ascii=False
     """
     # BEGIN
-    pass
+    path = module_relative_path("config.json")
+    with open(path,"w",encoding="utf-8") as f:
+        json.dump(cfg,f,indent=2,ensure_ascii=False)
     # END
 
 def main() -> None:
@@ -192,11 +211,21 @@ def main() -> None:
                     config["highlight"] = (parts[1].lower() == "on")
                     print("Highlighting", "ON" if config["highlight"] else "OFF")
                     # ToDo 3: Use save_config(...) to write the config.json file when the highlight setting changes
+                    save_config(config)
                 else:
                     print("Usage: :highlight on|off")
                 continue
 
             # ToDo 0 - Copy (and adapt) your implementation of the search mode CLI from part 4 of the exercise
+            if raw.startswith(":search-mode"):
+                parts = raw.split()
+                if len(parts) == 2 and parts[1].upper() in ("AND", "OR"):
+                    config["search_mode"] = parts[1].upper()
+                    print(f"Search mode set to {config['search_mode']}")
+                    save_config(config)
+                else:
+                    print("Usage: :search-mode AND|OR")
+                continue
 
             print("Unknown command. Type :help for commands.")
             continue
