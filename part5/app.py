@@ -249,16 +249,36 @@ def main() -> None:
                     combined_result = combined_results[i]
                     result = results[i]
 
-                    # ToDo 0 - Copy your implementation of the search mode from part 4 of the exercise
-                    if config["search_mode"] == "AND":
-                        if combined_result["matches"] > 0 and result["matches"] > 0:
-                            # Only if we have matches in both results, we consider the sonnet (logical AND!)
-                            combined_results[i] = combine_results(combined_result, result)
-                        else:
-                            # Not in both. No match!
-                            combined_result["matches"] = 0
+        # ToDo 0 - Copy your implementation of the search mode from part 4 of the exercise
+        combined_result = combined_results[i]
+        result = results[i]
 
-        print_results(raw, combined_results, bool(config["highlight"]))
+        if search_mode == "AND":
+            if combined_result["matches"] > 0 and result["matches"] > 0:
+                combined_results[i] = combine_results(combined_result, result)
+            else:
+                combined_results[i] = {
+                    "title": combined_result["title"],
+                    "title_spans": [],
+                    "line_matches": [],
+                    "matches": 0,
+                }
+        else:
+            if combined_result["matches"] > 0 and result["matches"] > 0:
+                combined_results[i] = combine_results(combined_result, result)
+            elif combined_result["matches"] > 0:
+                combined_results[i] = combined_result
+            elif result["matches"] > 0:
+                combined_results[i] = result
+            else:
+                combined_results[i] = {
+                    "title": combined_result["title"],
+                    "title_spans": [],
+                    "line_matches": [],
+                    "matches": 0,
+                }
+
+    print_results(raw, combined_results, bool(config["highlight"]))
 
 if __name__ == "__main__":
     main()
