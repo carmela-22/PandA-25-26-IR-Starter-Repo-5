@@ -249,7 +249,7 @@ def main() -> None:
                     combined_result = combined_results[i]
                     result = results[i]
 
-        # ToDo 0 - Copy your implementation of the search mode from part 4 of the exercise
+        #ToDo 0 - Copy your implementation of the search mode from part 4 of the exercise
         combined_result = combined_results[i]
         result = results[i]
 
